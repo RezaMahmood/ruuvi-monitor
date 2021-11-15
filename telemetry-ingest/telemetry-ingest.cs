@@ -16,7 +16,7 @@ namespace rezamahmood.telemetry
     {
         [FunctionName("telemetry_ingest")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("telemetry-ingest request received");
@@ -36,7 +36,7 @@ namespace rezamahmood.telemetry
 
                 dynamic data = JsonConvert.DeserializeObject(requestBody);
 
-                await container.CreateItemAsync(data, new PartitionKey(data.sensorname));
+                await container.CreateItemAsync(data, new PartitionKey(data.sensorname.ToString()));
 
             }
             catch (Exception ex)
