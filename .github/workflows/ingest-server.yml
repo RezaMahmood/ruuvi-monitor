@@ -1,0 +1,50 @@
+name: IngestServer CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "telemetry-ingest/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "telemetry-ingest/**"
+
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_NAME: "reza-telemetry-ingest"
+  APP_DIRECTORY: "./telemetry-ingest"
+  DOTNET_VERSION: "3.1.x"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout IngestFunc"
+        uses: actions/checkout@v2
+
+      - name: "Setup dotnet environment"
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: "Restore project and dependencies"
+        shell: bash
+        run: |
+          cd ${{ env.APP_DIRECTORY }}
+          dotnet restore
+          dotnet build --configuration Release --output './publish'
+
+      - name: "Authenticate with Azure"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: "Deploy to Azure Function"
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: "${{ env.APP_DIRECTORY }}/publish"
