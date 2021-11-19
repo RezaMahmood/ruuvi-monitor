@@ -36,7 +36,7 @@ namespace rezamahmood.telemetry
 
                 dynamic data = JsonConvert.DeserializeObject(requestBody);
 
-                await container.CreateItemAsync(data, new PartitionKey(data.sensorname));
+                await container.CreateItemAsync(data, new PartitionKey(data.sensorname.ToString()));
 
             }
             catch (Exception ex)
